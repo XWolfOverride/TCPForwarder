@@ -206,13 +206,13 @@ namespace Forwarder
                         if (scksrc.Available > 0)
                         {
                             afetch = true;
-                            trans.uploaded += dump(scksrc, sckdst);
+                            trans.AddUpload(Dump(scksrc, sckdst));
                             fw.Message(ForwarderMessage.FromSendTransmission(trans));
                         }
                         if (sckdst.Available > 0)
                         {
                             afetch = true;
-                            trans.downloaded += dump(sckdst, scksrc);
+                            trans.AddDownload(Dump(sckdst, scksrc));
                             fw.Message(ForwarderMessage.FromReceiveTransmission(trans));
                         }
                         if (!afetch)
@@ -231,13 +231,15 @@ namespace Forwarder
                 }
             }
 
-            private static int dump(Socket sfrom, Socket sto)
+            private static byte[] Dump(Socket sfrom, Socket sto)
             {
-                int result;
-                byte[] buf = new byte[result = sfrom.Available];
+                int bsize = sfrom.Available;
+                if (bsize == 0)
+                    return null;
+                byte[] buf = new byte[bsize];
                 sfrom.Receive(buf);
                 sto.Send(buf);
-                return result;
+                return buf;
             }
 
             public Transmission Transmission => trans;
@@ -352,8 +354,11 @@ namespace Forwarder
     {
         private IPEndPoint src;
         private IPEndPoint dst;
-        internal int uploaded;
-        internal int downloaded;
+        private int uploaded;
+        private int downloaded;
+        private List<Sentence> conversation = new List<Sentence>();
+        private Sentence lastSay;
+        private Sentence lastListen;
 
         public Transmission(IPEndPoint src, IPEndPoint dst)
         {
@@ -361,10 +366,55 @@ namespace Forwarder
             this.dst = dst;
         }
 
+        internal void AddUpload(byte[] b)
+        {
+            if (b == null)
+                return;
+            uploaded += b.Length;
+            conversation.Add(new Sentence(b, true));
+        }
+
+        internal void AddDownload(byte[] b)
+        {
+            if (b == null)
+                return;
+            downloaded += b.Length;
+            conversation.Add(new Sentence(b, false));
+        }
+
         public IPEndPoint SourceIP => src;
         public IPEndPoint DestinationIP => dst;
         public object Tag { get; set; }
         public int Uploaded => uploaded;
         public int Downloaded => downloaded;
+        public Sentence[] Conversation => conversation.ToArray();
+    }
+
+    public class Sentence
+    {
+        private DateTime begin= DateTime.Now;
+        private DateTime end;
+        private byte[] data;
+        private bool me;
+
+        public Sentence(byte[] data,bool me)
+        {
+            this.me = me;
+            Append(data);
+        }
+
+        internal void Append(byte[] data)
+        {
+            if (this.data == null)
+                this.data = data;
+            else
+            {
+                byte[] ndata = new byte[this.data.Length + data.Length];
+                this.data.CopyTo(ndata, 0);
+                data.CopyTo(ndata, this.data.Length);
+                this.data = ndata;
+            }
+            end = DateTime.Now;
+        }
     }
 }

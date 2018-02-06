@@ -48,14 +48,6 @@ namespace Forwarder
             lbForwarders.Invalidate();
         }
 
-        private void button2_Click(object sender, EventArgs e)
-        {
-            Forwarder fw = new Forwarder();
-            fw.SetLocal("0.0.0.0", "8088");
-            fw.SetRemote("tmed01.dlab.siemens.lab", "8000");
-            fw.Activate();
-        }
-
         private void btAdd_Click(object sender, EventArgs e)
         {
             ForwarderControl fc = new ForwarderControl();
