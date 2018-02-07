@@ -356,9 +356,8 @@ namespace Forwarder
         private IPEndPoint dst;
         private int uploaded;
         private int downloaded;
+        private DateTime date = DateTime.Now;
         private List<Sentence> conversation = new List<Sentence>();
-        private Sentence lastSay;
-        private Sentence lastListen;
 
         public Transmission(IPEndPoint src, IPEndPoint dst)
         {
@@ -387,34 +386,24 @@ namespace Forwarder
         public object Tag { get; set; }
         public int Uploaded => uploaded;
         public int Downloaded => downloaded;
+        public DateTime Date => date;
         public Sentence[] Conversation => conversation.ToArray();
     }
 
     public class Sentence
     {
-        private DateTime begin= DateTime.Now;
-        private DateTime end;
+        private DateTime time= DateTime.Now;
         private byte[] data;
         private bool me;
 
         public Sentence(byte[] data,bool me)
         {
             this.me = me;
-            Append(data);
+            this.data = data;
         }
 
-        internal void Append(byte[] data)
-        {
-            if (this.data == null)
-                this.data = data;
-            else
-            {
-                byte[] ndata = new byte[this.data.Length + data.Length];
-                this.data.CopyTo(ndata, 0);
-                data.CopyTo(ndata, this.data.Length);
-                this.data = ndata;
-            }
-            end = DateTime.Now;
-        }
+        public bool FromMe => me;
+        public byte[] Data => data;
+        public DateTime Time => time;
     }
 }

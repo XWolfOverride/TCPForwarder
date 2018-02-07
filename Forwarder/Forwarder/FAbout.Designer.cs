@@ -35,6 +35,7 @@
             this.llbAuthor = new System.Windows.Forms.LinkLabel();
             this.btOk = new System.Windows.Forms.Button();
             this.lbVer = new System.Windows.Forms.Label();
+            this.lbIp = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -65,7 +66,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lbText.Location = new System.Drawing.Point(12, 74);
             this.lbText.Name = "lbText";
-            this.lbText.Size = new System.Drawing.Size(270, 207);
+            this.lbText.Size = new System.Drawing.Size(270, 188);
             this.lbText.TabIndex = 2;
             this.lbText.Text = resources.GetString("lbText.Text");
             // 
@@ -88,7 +89,7 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.btOk.Location = new System.Drawing.Point(288, 12);
             this.btOk.Name = "btOk";
-            this.btOk.Size = new System.Drawing.Size(33, 269);
+            this.btOk.Size = new System.Drawing.Size(33, 250);
             this.btOk.TabIndex = 4;
             this.btOk.Text = "Ok";
             this.btOk.UseVisualStyleBackColor = true;
@@ -103,11 +104,23 @@
             this.lbVer.TabIndex = 5;
             this.lbVer.Text = "1.0";
             // 
+            // lbIp
+            // 
+            this.lbIp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.lbIp.AutoSize = true;
+            this.lbIp.ForeColor = System.Drawing.SystemColors.GrayText;
+            this.lbIp.Location = new System.Drawing.Point(12, 249);
+            this.lbIp.Name = "lbIp";
+            this.lbIp.Size = new System.Drawing.Size(35, 13);
+            this.lbIp.TabIndex = 6;
+            this.lbIp.Text = "label1";
+            // 
             // FAbout
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(330, 293);
+            this.ClientSize = new System.Drawing.Size(330, 274);
+            this.Controls.Add(this.lbIp);
             this.Controls.Add(this.lbVer);
             this.Controls.Add(this.btOk);
             this.Controls.Add(this.llbAuthor);
@@ -133,5 +146,6 @@
         private System.Windows.Forms.LinkLabel llbAuthor;
         private System.Windows.Forms.Button btOk;
         private System.Windows.Forms.Label lbVer;
+        private System.Windows.Forms.Label lbIp;
     }
 }

@@ -33,12 +33,12 @@
             this.panel1 = new System.Windows.Forms.Panel();
             this.lbForwarders = new System.Windows.Forms.ListBox();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.splitter1 = new System.Windows.Forms.Splitter();
-            this.pFord = new System.Windows.Forms.Panel();
-            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.btAbout = new System.Windows.Forms.Button();
             this.btDel = new System.Windows.Forms.Button();
             this.btAdd = new System.Windows.Forms.Button();
+            this.splitter1 = new System.Windows.Forms.Splitter();
+            this.pFord = new System.Windows.Forms.Panel();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.panel1.SuspendLayout();
             this.panel2.SuspendLayout();
             this.SuspendLayout();
@@ -51,7 +51,7 @@
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Margin = new System.Windows.Forms.Padding(5);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(200, 372);
+            this.panel1.Size = new System.Drawing.Size(210, 372);
             this.panel1.TabIndex = 2;
             // 
             // lbForwarders
@@ -63,10 +63,11 @@
             this.lbForwarders.ItemHeight = 40;
             this.lbForwarders.Location = new System.Drawing.Point(0, 0);
             this.lbForwarders.Name = "lbForwarders";
-            this.lbForwarders.Size = new System.Drawing.Size(200, 335);
+            this.lbForwarders.Size = new System.Drawing.Size(210, 335);
             this.lbForwarders.TabIndex = 1;
             this.lbForwarders.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.lbForwarders_DrawItem);
             this.lbForwarders.SelectedIndexChanged += new System.EventHandler(this.lbForwarders_SelectedIndexChanged);
+            this.lbForwarders.DoubleClick += new System.EventHandler(this.lbForwarders_DoubleClick);
             // 
             // panel2
             // 
@@ -76,25 +77,8 @@
             this.panel2.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.panel2.Location = new System.Drawing.Point(0, 335);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(200, 37);
+            this.panel2.Size = new System.Drawing.Size(210, 37);
             this.panel2.TabIndex = 2;
-            // 
-            // splitter1
-            // 
-            this.splitter1.Location = new System.Drawing.Point(200, 0);
-            this.splitter1.Name = "splitter1";
-            this.splitter1.Size = new System.Drawing.Size(3, 372);
-            this.splitter1.TabIndex = 3;
-            this.splitter1.TabStop = false;
-            // 
-            // pFord
-            // 
-            this.pFord.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pFord.Location = new System.Drawing.Point(203, 0);
-            this.pFord.MinimumSize = new System.Drawing.Size(300, 0);
-            this.pFord.Name = "pFord";
-            this.pFord.Size = new System.Drawing.Size(501, 372);
-            this.pFord.TabIndex = 4;
             // 
             // btAbout
             // 
@@ -111,7 +95,7 @@
             // 
             this.btDel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btDel.Image = global::Forwarder.Properties.Resources.world_delete;
-            this.btDel.Location = new System.Drawing.Point(132, 6);
+            this.btDel.Location = new System.Drawing.Point(142, 6);
             this.btDel.Name = "btDel";
             this.btDel.Size = new System.Drawing.Size(68, 26);
             this.btDel.TabIndex = 1;
@@ -125,7 +109,7 @@
             // 
             this.btAdd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btAdd.Image = global::Forwarder.Properties.Resources.world_add;
-            this.btAdd.Location = new System.Drawing.Point(61, 6);
+            this.btAdd.Location = new System.Drawing.Point(71, 6);
             this.btAdd.Name = "btAdd";
             this.btAdd.Size = new System.Drawing.Size(65, 26);
             this.btAdd.TabIndex = 0;
@@ -135,16 +119,33 @@
             this.btAdd.UseVisualStyleBackColor = true;
             this.btAdd.Click += new System.EventHandler(this.btAdd_Click);
             // 
+            // splitter1
+            // 
+            this.splitter1.Location = new System.Drawing.Point(210, 0);
+            this.splitter1.Name = "splitter1";
+            this.splitter1.Size = new System.Drawing.Size(3, 372);
+            this.splitter1.TabIndex = 3;
+            this.splitter1.TabStop = false;
+            // 
+            // pFord
+            // 
+            this.pFord.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pFord.Location = new System.Drawing.Point(213, 0);
+            this.pFord.MinimumSize = new System.Drawing.Size(300, 0);
+            this.pFord.Name = "pFord";
+            this.pFord.Size = new System.Drawing.Size(381, 372);
+            this.pFord.TabIndex = 4;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(704, 372);
+            this.ClientSize = new System.Drawing.Size(594, 372);
             this.Controls.Add(this.pFord);
             this.Controls.Add(this.splitter1);
             this.Controls.Add(this.panel1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.MinimumSize = new System.Drawing.Size(650, 200);
+            this.MinimumSize = new System.Drawing.Size(600, 200);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "TCP Forwarder";

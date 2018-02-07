@@ -49,6 +49,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DBPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DBPanel.Designer.cs">
+      <DependentUpon>DBPanel.cs</DependentUpon>
+    </Compile>
     <Compile Include="Extension.cs" />
     <Compile Include="FAbout.cs">
       <SubType>Form</SubType>
@@ -69,6 +75,12 @@
     <Compile Include="ForwarderControl.Designer.cs">
       <DependentUpon>ForwarderControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="FTransmission.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FTransmission.Designer.cs">
+      <DependentUpon>FTransmission.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="FAbout.resx">
@@ -79,6 +91,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ForwarderControl.resx">
       <DependentUpon>ForwarderControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FTransmission.resx">
+      <DependentUpon>FTransmission.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

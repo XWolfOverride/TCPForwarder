@@ -26,6 +26,7 @@ namespace Forwarder
 {
     static class Program
     {
+        public const string VERSION = "1.1";
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -42,7 +43,7 @@ namespace Forwarder
         {
             Exception ex = e.ExceptionObject as Exception;
             if (ex != null)
-                MessageBox.Show(ex.Message,"Critical "+ex.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message, "Critical " + ex.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 }

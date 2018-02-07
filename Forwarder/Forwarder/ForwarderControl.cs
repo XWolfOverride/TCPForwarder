@@ -84,10 +84,12 @@ namespace Forwarder
                     case ForwarderMessageType.DEACTIVATED:
                         lvi = lvHistory.Items.Add(msg.Message);
                         lvi.ImageIndex = 0;
+                        lvi.Tag = msg;
                         break;
                     case ForwarderMessageType.ERROR:
                         lvi = lvHistory.Items.Add(msg.Message);
                         lvi.ImageIndex = 1;
+                        lvi.Tag = msg;
                         break;
                     case ForwarderMessageType.TSTART:
                         lvi = lvHistory.Items.Add(msg.Message);
@@ -95,6 +97,7 @@ namespace Forwarder
                         msg.Transmission.Tag = lvi;
                         lvi.SubItems.Add("0");
                         lvi.SubItems.Add("0");
+                        lvi.Tag = msg;
                         break;
                     case ForwarderMessageType.TEND:
                     case ForwarderMessageType.TRECV:
@@ -105,13 +108,14 @@ namespace Forwarder
                             lvi = lvHistory.Items.Add("<<< Lost transmission >>>");
                             lvi.ImageIndex = 1;
                             msg.Transmission.Tag = lvi;
+                            lvi.SubItems.Add("");
+                            lvi.SubItems.Add("");
+                            lvi.Tag = msg;
                         }
-                        else
-                        {
-                            lvi.ImageIndex = FMessageIcon(msg.Type);
-                            lvi.SubItems[1].Text = FBytes(msg.Transmission.Uploaded);
-                            lvi.SubItems[2].Text = FBytes(msg.Transmission.Downloaded);
-                        }
+                        lvi.ImageIndex = FMessageIcon(msg.Type);
+                        lvi.SubItems[1].Text = Utils.FBytes(msg.Transmission.Uploaded);
+                        lvi.SubItems[2].Text = Utils.FBytes(msg.Transmission.Downloaded);
+                        FTransmission.Get(msg.Transmission)?.NotifyUpdate();
                         break;
                     default:
                         lvi = lvHistory.Items.Add("[??] " + msg.Message);
@@ -120,35 +124,12 @@ namespace Forwarder
                 }
             if (lvi != null)
             {
+                lvi.Tag = msg.Transmission;
                 if (rbFollow.Checked)
                     lvi.Selected = true;
                 //lvHistory_Resize(null, null);
             }
             lbInfo.Text = "Hints: " + sender.TotalConnections + " Alive: " + sender.CurrentConnections;
-        }
-
-        private string FBytes(int bytes)
-        {
-            if (bytes < 1024)
-                return bytes.ToString();
-            string tail = null;
-            double b = bytes;
-            if (b > 1024)
-            {
-                tail = "Kb";
-                b /= 1024;
-            }
-            if (b > 1024)
-            {
-                tail = "Mb";
-                b /= 1024;
-            }
-            if (b > 1024)
-            {
-                tail = "Gb";
-                b /= 1024;
-            }
-            return b.ToString("#0.00") + tail;
         }
 
         private bool RefreshForwarder()
@@ -182,9 +163,48 @@ namespace Forwarder
             return true;
         }
 
+        public void StartForwarder()
+        {
+            try
+            {
+                pConf.Enabled = false;
+                if (!RefreshForwarder())
+                {
+                    pConf.Enabled = true;
+                    return;
+                }
+                pConf.Enabled = true;
+
+                fw.Activate();
+                tbDestHost.Enabled = false;
+                tbDestPort.Enabled = false;
+                tbSrcPort.Enabled = false;
+                cbLocal.Enabled = false;
+                btStart.Text = "Stop";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, ex.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            WhenChanged?.Invoke();
+        }
+
         public void StopForwarder()
         {
-            fw.Deactivate();
+            try
+            {
+                fw.Deactivate();
+                tbDestHost.Enabled = true;
+                tbDestPort.Enabled = true;
+                tbSrcPort.Enabled = true;
+                cbLocal.Enabled = true;
+                btStart.Text = "Start";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, ex.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            WhenChanged?.Invoke();
         }
 
         public override string ToString()
@@ -192,48 +212,18 @@ namespace Forwarder
             return fw.ToString();
         }
 
-        public string SourcePort => tbSrcPort.Text;
-        public bool SourceLocal => cbLocal.Checked;
-        public string DestinationPort => tbDestPort.Text;
-        public string DestinationHost => tbDestHost.Text;
+        public string SourcePort { get => tbSrcPort.Text; set => tbSrcPort.Text = value; }
+        public bool SourceLocal { get => cbLocal.Checked; set => cbLocal.Checked = value; }
+        public string DestinationPort { get => tbDestPort.Text; set => tbDestPort.Text = value; }
+        public string DestinationHost { get => tbDestHost.Text; set => tbDestHost.Text = value; }
         public bool Active => fw.Active;
 
         private void btStart_Click(object sender, EventArgs e)
         {
-            try
-            {
-                if (fw.Active)
-                {
-                    fw.Deactivate();
-                    tbDestHost.Enabled = true;
-                    tbDestPort.Enabled = true;
-                    tbSrcPort.Enabled = true;
-                    cbLocal.Enabled = true;
-                    btStart.Text = "Start";
-                }
-                else
-                {
-                    pConf.Enabled = false;
-                    if (!RefreshForwarder())
-                    {
-                        pConf.Enabled = true;
-                        return;
-                    }
-                    pConf.Enabled = true;
-
-                    fw.Activate();
-                    tbDestHost.Enabled = false;
-                    tbDestPort.Enabled = false;
-                    tbSrcPort.Enabled = false;
-                    cbLocal.Enabled = false;
-                    btStart.Text = "Stop";
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, ex.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            WhenChanged?.Invoke();
+            if (fw.Active)
+                StopForwarder();
+            else
+                StartForwarder();
         }
 
         private void ConfChanged(object sender, EventArgs e)
@@ -243,18 +233,29 @@ namespace Forwarder
 
         private void lvHistory_Resize(object sender, EventArgs e)
         {
-            //lvHistory.Columns[0].AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
             int acw = 0;
             for (int i = 1; i < lvHistory.Columns.Count; i++)
                 acw += lvHistory.Columns[i].Width;
-            //if (lvHistory.Columns[0].Width + acw < lvHistory.ClientRectangle.Width)
             lvHistory.Columns[0].Width = lvHistory.ClientRectangle.Width - acw;
         }
 
         private void btClear_Click(object sender, EventArgs e)
         {
+            // Bread cycling references (Make life easy for c#)
+            foreach (ListViewItem lvi in lvHistory.Items)
+                lvi.Tag = null;
             lvHistory.Items.Clear();
             fw.ResetCounter();
+        }
+
+        private void lvHistory_DoubleClick(object sender, EventArgs e)
+        {
+            if (lvHistory.SelectedItems.Count < 0)
+                return;
+            Transmission t = lvHistory.SelectedItems[0].Tag as Transmission;
+            if (t == null)
+                return;
+            FTransmission.Execute(t);
         }
     }
 

@@ -5,6 +5,9 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -34,6 +37,8 @@ namespace Forwarder
         private FAbout()
         {
             InitializeComponent();
+            lbVer.Text = Program.VERSION;
+            GetIp();
         }
 
         public static void Execute()
@@ -42,6 +47,28 @@ namespace Forwarder
             {
                 f.ShowDialog();
             }
+        }
+
+        private void GetIp()
+        {
+            string output = "";
+            foreach (NetworkInterface item in NetworkInterface.GetAllNetworkInterfaces())
+                if (item.NetworkInterfaceType != NetworkInterfaceType.Loopback && item.OperationalStatus == OperationalStatus.Up)
+                    foreach (UnicastIPAddressInformation ip in item.GetIPProperties().UnicastAddresses)
+                        if (ip.Address.AddressFamily == AddressFamily.InterNetwork)
+                            output += ip.Address.ToString() + "\r\n";
+            output = output.Trim();
+            if (output.Length == 0)
+            
+                lbIp.Visible = false;
+            else
+            {
+                lbIp.Text = output;
+                Height += lbIp.Height;
+                lbText.Height -= lbIp.Height;
+                lbIp.Top = ClientSize.Height - (lbIp.Height + 12);
+            }
+            lbIp.Text = output;
         }
 
         private void llbAuthor_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
