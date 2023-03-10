@@ -40,7 +40,7 @@ namespace Forwarder
         public static string FBytes(int bytes)
         {
             if (bytes < 1024)
-                return bytes.ToString()+"b";
+                return bytes.ToString() + "b";
             string tail = null;
             double b = bytes;
             if (b > 1024)
@@ -92,18 +92,37 @@ namespace Forwarder
             return result.ToString();
         }
 
-        public static string BinToTextSample(byte[] data)
+        public static string BinToTextSample(this byte[] data, int max = MAX_DIALOG_PREVIEW)
         {
             if (data == null || data.Length == 0)
                 return "";
-            string result = Encoding.ASCII.GetString(data, 0, Math.Min(MAX_DIALOG_PREVIEW, data.Length));
+            string result = Encoding.ASCII.GetString(data, 0, Math.Min(max, data.Length));
             StringBuilder sb = new StringBuilder(result.Trim());
             for (int i = 0; i < sb.Length; i++)
                 if (Char.IsControl(sb[i]) && sb[i] != '\n' && sb[i] != '\r')
                     sb[i] = '□';
             result = sb.ToString();
-            if (data.Length > MAX_DIALOG_PREVIEW)
+            if (data.Length > max)
                 result += "\r\n...";
+            return result;
+        }
+
+        public static string ToComactString(this DateTime dt)
+        {
+            StringBuilder sb = new StringBuilder(dt.Year.ToString(), 64);
+            sb.Append(dt.Month.Lz());
+            sb.Append(dt.Day.Lz());
+            sb.Append(dt.Hour.Lz());
+            sb.Append(dt.Minute.Lz());
+            sb.Append(dt.Second.Lz());
+            return sb.ToString();
+        }
+
+        public static string Lz(this int i, int size = 2)
+        {
+            string result = i.ToString();
+            while (result.Length < size)
+                result = "0" + result;
             return result;
         }
     }

@@ -26,7 +26,7 @@ namespace Forwarder
 {
     static class Program
     {
-        public const string VERSION = "1.1";
+        public const string VERSION = "1.2";
         /// <summary>
         /// The main entry point for the application.
         /// </summary>

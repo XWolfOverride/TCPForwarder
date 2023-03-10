@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -183,7 +185,7 @@ namespace Forwarder
                     fw = forwarder;
                     scksrc = source;
                     sckdst = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    trans = new Transmission(scksrc.RemoteEndPoint as IPEndPoint, sckdst.RemoteEndPoint as IPEndPoint);
+                    trans = new Transmission(scksrc.RemoteEndPoint as IPEndPoint, remote);
                     forwarder.Message(ForwarderMessage.FromNewTransmission(trans));
                     sckdst.Connect(remote);
                 }
@@ -381,6 +383,55 @@ namespace Forwarder
             conversation.Add(new Sentence(b, false));
         }
 
+        public void SaveToFile(string path)
+        {
+            using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.Write))
+            using (ZipArchive za = new ZipArchive(fs, ZipArchiveMode.Create))
+            {
+                GenerateIndex(za.CreateEntry("Index.ini").Open());
+                for (int i = 0; i < conversation.Count; i++)
+                    GeneratePart(za.CreateEntry($"Part-{i + 1}.bin").Open(), conversation[i]);
+            }
+        }
+
+        private void GenerateIndex(Stream s)
+        {
+            using (s)
+            using (StreamWriter sw = new StreamWriter(s, Encoding.UTF8))
+            {
+                sw.WriteLine("; Transmission index file");
+                sw.WriteLine();
+                sw.WriteLine($"From={SourceIP}");
+                sw.WriteLine($"To={DestinationIP}");
+                sw.WriteLine($"Time={date.ToUniversalTime().ToString("O")}");
+                sw.WriteLine($"TotalSent={uploaded}");
+                sw.WriteLine($"TotalRecv={downloaded}");
+                for (int i = 0; i < conversation.Count; i++)
+                {
+                    sw.WriteLine();
+                    sw.WriteLine($"[Transfer({i + 1})]");
+                    Sentence sn = conversation[i];
+                    sw.WriteLine($"Time={sn.Time.ToUniversalTime().ToString("O")}");
+                    sw.WriteLine("Initiator=" + (sn.FromMe ? "Local" : "Remote"));
+                    sw.WriteLine($"Size={sn.Data.Length}");
+                    sw.WriteLine($"File=Part-{i + 1}.bin");
+                }
+            }
+        }
+
+        private void GeneratePart(Stream s, Sentence st)
+        {
+            using (s)
+            {
+                s.Write(st.Data, 0, st.Data.Length);
+            }
+        }
+
+        private string GetId()
+        {
+            return $"{src.Address}({src.Port})-{dst.Address}({dst.Port})@{date.ToComactString()}";
+        }
+
         public IPEndPoint SourceIP => src;
         public IPEndPoint DestinationIP => dst;
         public object Tag { get; set; }
@@ -388,22 +439,19 @@ namespace Forwarder
         public int Downloaded => downloaded;
         public DateTime Date => date;
         public Sentence[] Conversation => conversation.ToArray();
+        public string Id => GetId();
     }
 
     public class Sentence
     {
-        private DateTime time= DateTime.Now;
-        private byte[] data;
-        private bool me;
-
-        public Sentence(byte[] data,bool me)
+        public Sentence(byte[] data, bool me)
         {
-            this.me = me;
-            this.data = data;
+            FromMe = me;
+            Data = data;
         }
 
-        public bool FromMe => me;
-        public byte[] Data => data;
-        public DateTime Time => time;
+        public bool FromMe { get; }
+        public byte[] Data { get; }
+        public DateTime Time { get; } = DateTime.Now;
     }
 }

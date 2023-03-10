@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Net.Mail;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -13,10 +14,10 @@ namespace Forwarder
     public partial class FTransmission : Form
     {
         private static Dictionary<Transmission, FTransmission> fmap = new Dictionary<Transmission, FTransmission>();
-        private static Font fontMonospace = new Font("Lucida Console", 7.5f);
-        private static Font fontSmall = new Font(FontFamily.GenericSansSerif, 6f);
+        private static Font fontMonospace = new Font("Lucida Console", 8f);
+        private static Font fontSmall = new Font(FontFamily.GenericSansSerif, 7f);
 
-        private Transmission trans;
+        private readonly Transmission trans;
 
         private FTransmission(Transmission trans)
         {
@@ -28,10 +29,16 @@ namespace Forwarder
             pTimeline.HorizontalScroll.Visible = false;
             pTimeline.HorizontalScroll.Maximum = 0;
             pTimeline.AutoScroll = true;
+            Text += " " + trans.Id;
         }
 
         public static void Execute(Transmission trans)
         {
+            if (trans == null)
+            {
+                MessageBox.Show("Can't not load transmission, try again.");
+                return;
+            }
             FTransmission f;
             if (!fmap.TryGetValue(trans, out f))
                 fmap[trans] = f = new FTransmission(trans);
@@ -54,6 +61,8 @@ namespace Forwarder
 
         private void LoadTransmission()
         {
+            if (trans == null)
+                return;
             lbInfo.Text = "Transmission between " + trans.SourceIP + " and " + trans.DestinationIP;
             lbAt.Text = trans.Date.ToLongDateString() + " " + trans.Date.ToLongTimeString();
             lbCtt.Text = "Uploaded: " + Utils.FBytes(trans.Uploaded) + " Downloaded: " + Utils.FBytes(trans.Downloaded);
@@ -66,18 +75,18 @@ namespace Forwarder
             DateTime tlast = tstart;
             foreach (Sentence s in trans.Conversation)
             {
-                if ((s.Time - tlast).TotalSeconds > 30)
+                if ((s.Time - tlast).TotalSeconds > 5)
                 {
                     Label lbx = new Label();
                     lbx.Parent = pTimeline;
                     lbx.Font = fontSmall;
                     lbx.Text = "On hold by " + Utils.FTime(s.Time - tlast);
                     lbx.TextAlign = ContentAlignment.MiddleCenter;
-                    lbx.BackColor = Color.LightYellow;
+                    lbx.BackColor = Color.LightGray;
                     lbx.Top = y;
                     lbx.Left = 5;
                     lbx.Width = pTimeline.ClientSize.Width - 10;
-                    y += lbx.Height + 4;
+                    y += lbx.Height + 15;
                 }
                 Label lbs = new Label();
                 lbs.AutoSize = true;
@@ -88,20 +97,23 @@ namespace Forwarder
                 lbs.Left = s.FromMe ? 5 : pTimeline.ClientSize.Width - 5 - w2;
                 lbs.BackColor = s.FromMe ? Color.LightGreen : Color.LightBlue;
                 lbs.TextAlign = s.FromMe ? ContentAlignment.TopLeft : ContentAlignment.TopRight;
-                lbs.Text = Utils.BinToTextSample(s.Data);
+                lbs.Text = s.Data.BinToTextSample(1024);
                 lbs.Font = fontMonospace;
                 lbs.Parent = pTimeline;
+                lbs.Click += Lbs_Click;
+                lbs.Cursor = Cursors.Hand;
+                lbs.Tag = s;
                 Label lbt = new Label();
                 lbt.Parent = pTimeline;
                 lbt.Font = fontSmall;
-                lbt.Text = Utils.FTime(s.Time - tstart);
+                lbt.Text = $"At: {Utils.FTime(s.Time - tstart)}";
                 lbt.AutoSize = true;
                 lbt.Top = lbs.Top - 2;
                 lbt.Left = s.FromMe ? w2 + 10 : lbs.Left - lbt.Width - 5;
                 Label lbd = new Label();
                 lbd.Parent = pTimeline;
                 lbd.Font = fontSmall;
-                lbd.Text = Utils.FTime(s.Time - tlast);
+                lbd.Text = $"Take: {Utils.FTime(s.Time - tlast)}";
                 lbd.ForeColor = SystemColors.GrayText;
                 lbd.AutoSize = true;
                 lbd.Top = lbt.Top + lbt.Height - 1;
@@ -113,11 +125,18 @@ namespace Forwarder
                 lbz.AutoSize = true;
                 lbz.Top = lbd.Top + lbd.Height - 1;
                 lbz.Left = s.FromMe ? w2 + 10 : lbs.Left - lbz.Width - 5;
-                y += lbs.Height + 4;
+                y += lbs.Height + 15;
                 tlast = s.Time;
             }
             pTimeline.ResumeLayout();
             pTimeline.VerticalScroll.Value = cscroll;
+        }
+
+        private void Lbs_Click(object sender, EventArgs e)
+        {
+            if (!(sender is Label lb)) return;
+            if (!(lb.Tag is Sentence s)) return;
+            FData.Execute(Utils.FTime(s.Time - trans.Date),s);
         }
 
         private void FTransmission_FormClosed(object sender, FormClosedEventArgs e)
@@ -135,6 +154,18 @@ namespace Forwarder
         {
             tUpdate.Enabled = false;
             LoadTransmission();
+        }
+
+        private void btSaveAll_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.Filter = "*.zip|Zipped Transmission file";
+            sfd.DefaultExt = ".zip";
+            sfd.FileName = $"Transmission {trans.Id}.zip";
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                trans.SaveToFile(sfd.FileName);
+            }
         }
     }
 }
