@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 //Copyright(c) 2018 Iván Dominguez (XWolf Override)
 //
@@ -173,10 +171,10 @@ namespace Forwarder
 
         private class TcpProcess
         {
-            private Forwarder fw;
-            private Socket scksrc;
-            private Socket sckdst;
-            private Transmission trans;
+            private readonly Forwarder fw;
+            private readonly Socket scksrc;
+            private readonly Socket sckdst;
+            private readonly Transmission trans;
 
             public TcpProcess(Forwarder forwarder, Socket source, IPEndPoint remote)
             {
@@ -279,7 +277,6 @@ namespace Forwarder
         private ForwarderMessageType type;
         private string message;
         private Exception exception;
-        private DateTime time = DateTime.Now;
         private Transmission trans;
 
         private ForwarderMessage()
@@ -289,77 +286,90 @@ namespace Forwarder
 
         public static ForwarderMessage FromException(Exception ex)
         {
-            ForwarderMessage fw = new ForwarderMessage();
-            fw.type = ForwarderMessageType.ERROR;
-            fw.message = ex.GetType().Name + ": " + ex.Message;
-            fw.exception = ex;
+            ForwarderMessage fw = new ForwarderMessage
+            {
+                type = ForwarderMessageType.ERROR,
+                message = ex.GetType().Name + ": " + ex.Message,
+                exception = ex
+            };
             return fw;
         }
 
         public static ForwarderMessage FromActivation()
         {
-            ForwarderMessage fw = new ForwarderMessage();
-            fw.type = ForwarderMessageType.ACTIVATED;
-            fw.message = "Listener enabled";
+            ForwarderMessage fw = new ForwarderMessage
+            {
+                type = ForwarderMessageType.ACTIVATED,
+                message = "Listener enabled"
+            };
             return fw;
         }
 
         public static ForwarderMessage FromDeactivation()
         {
-            ForwarderMessage fw = new ForwarderMessage();
-            fw.type = ForwarderMessageType.DEACTIVATED;
-            fw.message = "Listener disabled";
+            ForwarderMessage fw = new ForwarderMessage
+            {
+                type = ForwarderMessageType.DEACTIVATED,
+                message = "Listener disabled"
+            };
             return fw;
         }
 
         public static ForwarderMessage FromNewTransmission(Transmission trans)
         {
-            ForwarderMessage fw = new ForwarderMessage();
-            fw.type = ForwarderMessageType.TSTART;
-            fw.trans = trans;
-            fw.message = "Transmission from " + trans.SourceIP;
+            ForwarderMessage fw = new ForwarderMessage
+            {
+                type = ForwarderMessageType.TSTART,
+                trans = trans,
+                message = "Transmission from " + trans.SourceIP
+            };
             return fw;
         }
 
         public static ForwarderMessage FromSendTransmission(Transmission trans)
         {
-            ForwarderMessage fw = new ForwarderMessage();
-            fw.type = ForwarderMessageType.TSEND;
-            fw.trans = trans;
+            ForwarderMessage fw = new ForwarderMessage
+            {
+                type = ForwarderMessageType.TSEND,
+                trans = trans
+            };
             return fw;
         }
 
         public static ForwarderMessage FromReceiveTransmission(Transmission trans)
         {
-            ForwarderMessage fw = new ForwarderMessage();
-            fw.type = ForwarderMessageType.TRECV;
-            fw.trans = trans;
+            ForwarderMessage fw = new ForwarderMessage
+            {
+                type = ForwarderMessageType.TRECV,
+                trans = trans
+            };
             return fw;
         }
 
         public static ForwarderMessage FromEndTransmission(Transmission trans)
         {
-            ForwarderMessage fw = new ForwarderMessage();
-            fw.type = ForwarderMessageType.TEND;
-            fw.trans = trans;
+            ForwarderMessage fw = new ForwarderMessage
+            {
+                type = ForwarderMessageType.TEND,
+                trans = trans
+            };
             return fw;
         }
 
         public ForwarderMessageType Type => type;
         public string Message => message;
-        public DateTime TimeStamp => time;
+        public DateTime TimeStamp { get; } = DateTime.Now;
         public Exception Exception => exception;
         public Transmission Transmission => trans;
     }
 
     public class Transmission
     {
-        private IPEndPoint src;
-        private IPEndPoint dst;
+        private readonly IPEndPoint src;
+        private readonly IPEndPoint dst;
         private int uploaded;
         private int downloaded;
-        private DateTime date = DateTime.Now;
-        private List<Sentence> conversation = new List<Sentence>();
+        private readonly List<Sentence> conversation = new List<Sentence>();
 
         public Transmission(IPEndPoint src, IPEndPoint dst)
         {
@@ -403,7 +413,7 @@ namespace Forwarder
                 sw.WriteLine();
                 sw.WriteLine($"From={SourceIP}");
                 sw.WriteLine($"To={DestinationIP}");
-                sw.WriteLine($"Time={date.ToUniversalTime().ToString("O")}");
+                sw.WriteLine($"Time={Date.ToUniversalTime().ToString("O")}");
                 sw.WriteLine($"TotalSent={uploaded}");
                 sw.WriteLine($"TotalRecv={downloaded}");
                 for (int i = 0; i < conversation.Count; i++)
@@ -429,7 +439,7 @@ namespace Forwarder
 
         private string GetId()
         {
-            return $"{src.Address}({src.Port})-{dst.Address}({dst.Port})@{date.ToComactString()}";
+            return $"{src.Address}({src.Port})-{dst.Address}({dst.Port})@{Date.ToComactString()}";
         }
 
         public IPEndPoint SourceIP => src;
@@ -437,7 +447,7 @@ namespace Forwarder
         public object Tag { get; set; }
         public int Uploaded => uploaded;
         public int Downloaded => downloaded;
-        public DateTime Date => date;
+        public DateTime Date { get; } = DateTime.Now;
         public Sentence[] Conversation => conversation.ToArray();
         public string Id => GetId();
     }

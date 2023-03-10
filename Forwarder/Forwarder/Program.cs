@@ -41,8 +41,7 @@ namespace Forwarder
 
         private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            Exception ex = e.ExceptionObject as Exception;
-            if (ex != null)
+            if (e.ExceptionObject is Exception ex)
                 MessageBox.Show(ex.Message, "Critical " + ex.GetType().Name, MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }

@@ -62,10 +62,10 @@ namespace Forwarder
                 return false;
             try
             {
-                foreach(string line in File.ReadAllLines(cfgPath))
+                foreach (string line in File.ReadAllLines(cfgPath))
                 {
                     string[] lp = line.Split(':');
-                    if (lp.Length != 3 || lp[0].Length<1)
+                    if (lp.Length != 3 || lp[0].Length < 1)
                         continue;
                     ForwarderControl fc = AddForwarder();
                     fc.SourceLocal = lp[0][0] == '-';
@@ -86,8 +86,8 @@ namespace Forwarder
             try
             {
                 List<string> fws = new List<string>();
-                foreach(ForwarderControl fc in lbForwarders.Items)
-                    fws.Add( (fc.SourceLocal ? "-" : "*") + fc.SourcePort + ":" + fc.DestinationHost + ":" + fc.DestinationPort);
+                foreach (ForwarderControl fc in lbForwarders.Items)
+                    fws.Add((fc.SourceLocal ? "-" : "*") + fc.SourcePort + ":" + fc.DestinationHost + ":" + fc.DestinationPort);
                 File.WriteAllLines(cfgPath, fws.ToArray());
             }
             catch { };

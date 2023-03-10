@@ -252,8 +252,7 @@ namespace Forwarder
         {
             if (lvHistory.SelectedItems.Count < 0)
                 return;
-            Transmission t = lvHistory.SelectedItems[0].Tag as Transmission;
-            if (t == null)
+            if (!(lvHistory.SelectedItems[0].Tag is Transmission t))
                 return;
             FTransmission.Execute(t);
         }

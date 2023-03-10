@@ -44,9 +44,7 @@ namespace Forwarder
         public static void Execute()
         {
             using (FAbout f = new FAbout())
-            {
                 f.ShowDialog();
-            }
         }
 
         private void GetIp()
@@ -59,7 +57,6 @@ namespace Forwarder
                             output += ip.Address.ToString() + "\r\n";
             output = output.Trim();
             if (output.Length == 0)
-            
                 lbIp.Visible = false;
             else
             {

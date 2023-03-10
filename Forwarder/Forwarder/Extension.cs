@@ -99,7 +99,7 @@ namespace Forwarder
             string result = Encoding.ASCII.GetString(data, 0, Math.Min(max, data.Length));
             StringBuilder sb = new StringBuilder(result.Trim());
             for (int i = 0; i < sb.Length; i++)
-                if (Char.IsControl(sb[i]) && sb[i] != '\n' && sb[i] != '\r')
+                if (char.IsControl(sb[i]) && sb[i] != '\n' && sb[i] != '\r')
                     sb[i] = '□';
             result = sb.ToString();
             if (data.Length > max)
